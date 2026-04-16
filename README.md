@@ -1,63 +1,49 @@
 # pcgrad Package
 
-Package này cung cấp môi trường mô phỏng robotic arm trong **NVIDIA Isaac Sim** và tích hợp điều khiển thông qua **ROS 2**.
+This package provides a robotic arm simulation environment within **NVIDIA Isaac Sim**, integrated with **ROS 2** for control.
 
-## 📋 Yêu cầu hệ thống
+## 📋 System Requirements
 
-Để chạy được package này, bạn cần có:
+To run this package, you will need:
 - **Ubuntu 22.04**
 - **ROS 2 Humble**
-- **NVIDIA Isaac Sim** (phiên bản 4.5.0)
-- Một chiếc GPU NVIDIA mạnh mẽ hỗ trợ Ray Tracing (RTX).
+- **NVIDIA Isaac Sim** (Version 4.5.0 or later recommended)
+- A powerful NVIDIA GPU with Ray Tracing (RTX) support.
 
-## 🛠 Cài đặt
+## 🛠 Installation
 
-1. Di chuyển vào thư mục workspace của bạn:
+1. Navigate to your workspace directory:
    ```bash
    cd ~/Project/ros2_ws
    ```
 
-2. Biên dịch package bằng `colcon`:
+2. Build the package using `colcon`:
    ```bash
    colcon build --packages-select pcgrad
    ```
 
-3. Source môi trường:
+3. Source the environment:
    ```bash
    source install/setup.bash
    ```
 
-## 🚀 Cách sử dụng
+## 🚀 Usage
 
-Package này sử dụng một file launch để khởi động đồng thời cả môi trường mô phỏng và node gửi lệnh điều khiển giả lập.
+This package includes a launch file to start both the simulation environment and a mock controller node simultaneously.
 
-Khởi chạy bằng lệnh sau:
+Run the following command:
 ```bash
 ros2 launch pcgrad pcgrad_launch.py
 ```
 
-### Chi tiết các Node
+## 📂 Project Structure
 
-- **`run_environment`**: 
-  - Khởi động ứng dụng Isaac Sim.
-  - Tải robot từ file URDF tại: `src/robot_description/ARM/robot.urdf`.
-  - Tải bàn (`TABLE.usd`) và các vật thể mô phỏng.
-  - Thiết lập các liên kết vật lý (Phyisics) và khớp nối (FixedJoint).
-  - Thu thập dữ liệu từ camera và thực hiện điều khiển các khớp robot.
+- `launch/pcgrad_launch.py`: Configures the launch sequence with a delay to ensure Isaac Sim is ready.
+- `pcgrad/run_environment.py`: Main source code managing Isaac Sim and the ROS 2 node integration.
+- `pcgrad/joints_state.py`: Python node publishing mock control data.
+- `setup.py`: Defines entry points for ROS 2 executables.
 
-- **`joints_state`**:
-  - Node này đóng vai trò là "controller" đơn giản.
-  - Nó liên tục gửi mảng giá trị `Float64MultiArray` lên topic `/joints_state`.
-  - Dữ liệu bao gồm: `[Joint1, Joint2, Joint3, Joint4, Gripper]`.
+## ⚠️ Important Notes
 
-## 📂 Cấu trúc mã nguồn
-
-- `launch/pcgrad_launch.py`: Cấu hình khởi chạy các node với độ trễ (delay) để đảm bảo Isaac Sim sẵn sàng.
-- `pcgrad/run_environment.py`: Mã nguồn chính điều khiển Isaac Sim và ROS 2 node.
-- `pcgrad/joints_state.py`: Node Python gửi dữ liệu điều khiển giả lập.
-- `setup.py`: Định nghĩa các entry points để ROS 2 có thể nhận diện lệnh thực thi.
-
-## ⚠️ Lưu ý
-
-- Đảm bảo đường dẫn đến tài sản (assets) trong `run_environment.py` là chính xác.
-- Isaac Sim cần một khoảng thời gian để khởi tạo GPU, vì vậy file launch đã được thiết lập delay 3 giây trước khi node môi trường bắt đầu chạy.
+- Ensure that all asset paths in `run_environment.py` are correct for your local setup.
+- Isaac Sim requires time to initialize the GPU. The launch file is configured with a 3-second delay before the environment node starts.

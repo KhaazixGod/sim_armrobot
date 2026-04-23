@@ -26,6 +26,8 @@ from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 from ament_index_python.packages import get_package_prefix
 import omni.kit.commands
+from isaacsim.sensors.camera import Camera
+
 
 # Derive workspace src path: install/pcgrad -> ../../src
 _pkg_prefix = get_package_prefix('pcgrad')
@@ -37,7 +39,9 @@ ROBOT_DESCRIPTION_DIR = os.path.realpath(os.path.join(_ws_src, 'robot_descriptio
 class VisionProcessingNode(Node):
     def __init__(self):
         super().__init__('vision_processing_node')
-        
+        width, height = 1920, 1200
+        camera_matrix = [[958.8, 0.0, 957.8], [0.0, 956.7, 589.5], [0.0, 0.0, 1.0]]
+        distortion_coefficients = [0.14, -0.03, -0.0002, -0.00003, 0.009, 0.5, -0.07, 0.017]
         # 1. Subscriber: Lắng nghe topic ảnh từ camera (Gazebo, Isaac Sim, hoặc cam thực tế)
         self.subscription = self.create_subscription(
             Image,
@@ -99,7 +103,6 @@ class VisionProcessingNode(Node):
         )
         # Get stage handle
         stage = omni.usd.get_context().get_stage()
-
         # Enable physics
         scene = UsdPhysics.Scene.Define(stage, Sdf.Path("/physicsScene"))
         # Set gravity
@@ -129,30 +132,54 @@ class VisionProcessingNode(Node):
         distantLight = UsdLux.DistantLight.Define(stage, Sdf.Path("/DistantLight"))
         distantLight.CreateIntensityAttr(500)
 
-        # Get handle to the Drive API for both wheels
+        # Add camera
+        self.camera = Camera(
+            prim_path="/World/camera",
+            position=np.array([0.0, 0.0, 180.0]),
+            frequency=20,
+            resolution=(256, 256),
+            orientation=euler_angles_to_quat(np.array([0, 90, 0]), degrees=True),
+        )
+        self.camera2 = Camera(
+            prim_path="/World/camera2",
+            position=np.array([22.4, 195.0, 99.0]),
+
+            frequency=20,
+            resolution=(256, 256),
+        )
+        # camera_axes="usd" → bypass W_U_TRANSFORM, ghi thẳng quaternion vào USD prim
+        # extrinsic=False → intrinsic XYZ, cùng convention với USD rotateXYZ
+        self.camera2.set_world_pose(
+            position=np.array([22.4, 195.0, 99.0]),
+            orientation=euler_angles_to_quat(np.array([-90.0, 0.0, 180.0]), degrees=True, extrinsic=False),
+            camera_axes="usd",
+        )
+
+        # Get handle to the Drive API for joints
         self.joint0_drive = UsdPhysics.DriveAPI.Get(stage.GetPrimAtPath("/World/robot/joints/joint0"), "angular")
         self.joint1_drive = UsdPhysics.DriveAPI.Get(stage.GetPrimAtPath("/World/robot/joints/joint1"), "angular")
         self.joint2_drive = UsdPhysics.DriveAPI.Get(stage.GetPrimAtPath("/World/robot/joints/joint2"), "angular")
         self.joint3_drive = UsdPhysics.DriveAPI.Get(stage.GetPrimAtPath("/World/robot/joints/joint3"), "angular")
-        # self.jointleft_drive = UsdPhysics.DriveAPI.Apply(stage.GetPrimAtPath("/World/robot/joints/left_finger"), "linear")
-        # self.jointright_drive = UsdPhysics.DriveAPI.Apply(stage.GetPrimAtPath("/World/robot/joints/right_finger"), "linear")
+        self.jointleft_drive = UsdPhysics.DriveAPI.Apply(stage.GetPrimAtPath("/World/robot/joints/left_finger"), "linear")
+        self.jointright_drive = UsdPhysics.DriveAPI.Apply(stage.GetPrimAtPath("/World/robot/joints/right_finger"), "linear")
+
         # Set the drive damping, which controls the strength of the velocity drive
         self.joint0_drive.GetDampingAttr().Set(15000)
         self.joint1_drive.GetDampingAttr().Set(15000)
         self.joint2_drive.GetDampingAttr().Set(15000)
         self.joint3_drive.GetDampingAttr().Set(15000)
-        # self.jointleft_drive.CreateDampingAttr().Set(15000)
-        # self.jointright_drive.CreateDampingAttr().Set(15000)
+        self.jointleft_drive.CreateDampingAttr().Set(15000)
+        self.jointright_drive.CreateDampingAttr().Set(15000)
 
-        # Set the drive stiffness, which controls the strength of the position drive
-        # In this case because we want to do velocity control this should be set to zero
+        # Setup joints
         self.joint0_drive.GetStiffnessAttr().Set(10000)
         self.joint1_drive.GetStiffnessAttr().Set(10000)
         self.joint2_drive.GetStiffnessAttr().Set(10000)
         self.joint3_drive.GetStiffnessAttr().Set(10000)
-        # self.jointleft_drive.CreateStiffnessAttr().Set(10000)
-        # self.jointright_drive.CreateStiffnessAttr().Set(10000)
+        self.jointleft_drive.CreateStiffnessAttr().Set(10000)
+        self.jointright_drive.CreateStiffnessAttr().Set(10000)
 
+        # Add table
         asset_path = os.path.join(ROBOT_DESCRIPTION_DIR, 'table', 'source', 'TABLE.usd')
         simulation_context = SimulationContext()
         add_reference_to_stage(asset_path, "/World/table")
@@ -164,26 +191,34 @@ class VisionProcessingNode(Node):
             orientations=table_quat.reshape(1, 4)
         )
         table = GeometryPrim(prim_paths_expr="/World/table", name="table_geo")
-        # Bật collision (Nếu chưa được bật khi khởi tạo)
+        # Ensure that collision is enabled
         table.enable_collision()
-        # Quan trọng: Thiết lập kiểu xấp xỉ va chạm (Collision Approximation)
-        # Các kiểu phổ biến: "convexHull", "convexDecomposition" (cho mesh phức tạp), "boundingCube", "none" (triangle mesh)
+        # Set collision approximation
         table.set_collision_approximations(approximation_types=["convexHull"])
         UsdGeom.Xform.Define(stage, "/World/table/base")
+        # Set color
+        r = 153.0
+        g = 76.0
+        b = 0.0
+        omni.kit.commands.execute("ChangeProperty", 
+            prop_path="/World/table/Looks/material_1___Default/material_1___Default.inputs:diffuse_color_constant", 
+            value=Gf.Vec3f(r/255.0, g/255.0, b/255.0), # Green
+            prev=Gf.Vec3f(1.0, 1.0, 1.0))
+        self.get_logger().info(f"Set color for table {r/255}, {g/255}, {b/255}")
+        kit.update()
 
         # Gắn RigidBodyAPI cho /World/table/base để physics engine nhận diện nó là body
         base_prim = stage.GetPrimAtPath("/World/table/base")
         rigid_body = UsdPhysics.RigidBodyAPI.Apply(base_prim)
-        rigid_body.CreateKinematicEnabledAttr(True)  # kinematic = không bị trọng lực kéo
+        rigid_body.CreateKinematicEnabledAttr(True)  
 
         robotXForm = XFormPrim(prim_paths_expr='/World/robot', name="robot")
         robot_quat = euler_angles_to_quat(np.array([0, 0, 0]), degrees=True)
         robotXForm.set_world_poses(
-            positions=np.array([[0.0, 0.0, 97.4]]), 
+            positions=np.array([[0.0, 0.0, 96.0]]), 
             orientations=robot_quat.reshape(1, 4)
         )
 
-        # Tạo FixedJoint trực tiếp bằng USD API 
         # Tạo FixedJoint trực tiếp bằng USD API 
         # Dùng body0 = mb1 (link gốc robot), body1 = new_cube_2
         fixed_joint = UsdPhysics.FixedJoint.Define(stage, "/World/robot/mb1/fixed_joint")
@@ -244,7 +279,7 @@ class VisionProcessingNode(Node):
         # Gán lại các biến từ list để dễ xử lý
         j1 = data[0]
         j2 = data[1]
-        j3 = data[2]    
+        j3 = data[2]
         j4 = data[3]
         gripper = data[4]
 
@@ -256,8 +291,8 @@ class VisionProcessingNode(Node):
         self.joint1_drive.GetTargetPositionAttr().Set(j2)
         self.joint2_drive.GetTargetPositionAttr().Set(j3)
         self.joint3_drive.GetTargetPositionAttr().Set(j4)
-        # self.jointleft_drive.GetTargetPositionAttr().Set(dem)
-        # self.jointright_drive.GetTargetPositionAttr().Set(dem)
+        self.jointleft_drive.GetTargetPositionAttr().Set(gripper)
+        self.jointright_drive.GetTargetPositionAttr().Set(gripper)
         
         kit.update()
 
@@ -268,6 +303,7 @@ def main(args=None):
     try:
         while rclpy.ok():
             rclpy.spin_once(node, timeout_sec=0.0)  # Non-blocking ROS callback
+                
             kit.update()  # Update Isaac Sim mỗi frame
     except KeyboardInterrupt:
         pass

@@ -30,7 +30,7 @@ class ArmControllerPublisher(Node):
         joint2_angle = 0.50   # rad
         joint3_angle = -0.75  # rad
         joint4_angle = 0.75  # rad
-        gripper_length = 0.05 # m (5 cm)
+        gripper_length = 1 # m (5 cm)
         
         # Đóng gói 4 phần dữ liệu vào thuộc tính .data dưới dạng một list Python
         msg.data = [joint1_angle, joint2_angle, joint3_angle, joint4_angle, gripper_length]
@@ -40,7 +40,7 @@ class ArmControllerPublisher(Node):
         
         # In log để dễ theo dõi
         # self.get_logger().info(f'Pub: [J1: {joint1_angle:.2f}, J2: {joint2_angle:.2f}, J3: {joint3_angle:.2f}, Grip: {gripper_length:.2f}]')
-
+    
 def main(args=None):
     rclpy.init(args=args)
     node = ArmControllerPublisher()

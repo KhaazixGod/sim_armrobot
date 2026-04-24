@@ -36,6 +36,19 @@ Run the following command:
 ros2 launch pcgrad pcgrad_launch.py
 ```
 
+## 📡 ROS 2 Topics
+
+The environment publishes the following camera streams:
+
+- `/camera_top/image_raw` (sensor_msgs/Image): Top-down view of the workspace.
+- `/camera_side/image_raw` (sensor_msgs/Image): Side-angle view of the workspace.
+
+You can visualize these topics using `rqt_image_view`:
+```bash
+ros2 run rqt_image_view rqt_image_view
+```
+
+
 ## 📂 Project Structure
 
 - `launch/pcgrad_launch.py`: Configures the launch sequence with a delay to ensure Isaac Sim is ready.

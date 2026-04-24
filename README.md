@@ -7,7 +7,7 @@ This package provides a robotic arm simulation environment within **NVIDIA Isaac
 To run this package, you will need:
 - **Ubuntu 22.04**
 - **ROS 2 Humble**
-- **NVIDIA Isaac Sim** (Version 4.5.0 or later recommended)
+- **NVIDIA Isaac Sim** (Version 4.5.0)
 - A powerful NVIDIA GPU with Ray Tracing (RTX) support.
 
 ## 🛠 Installation

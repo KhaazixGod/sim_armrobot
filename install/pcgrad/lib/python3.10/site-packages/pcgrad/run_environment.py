@@ -27,11 +27,11 @@ from std_msgs.msg import Float64MultiArray
 from ament_index_python.packages import get_package_prefix
 import omni.kit.commands
 from isaacsim.sensors.camera import Camera
-from cv_bridge import CvBridge
+
 
 # Derive workspace src path: install/pcgrad -> ../../src
 _pkg_prefix = get_package_prefix('pcgrad')
-_ws_src = os.path.join(_pkg_prefix, '..', '..','src')
+_ws_src = os.path.join(_pkg_prefix, '..', '..')
 ROBOT_DESCRIPTION_DIR = os.path.realpath(os.path.join(_ws_src, 'robot_description'))
 
 
@@ -39,15 +39,19 @@ ROBOT_DESCRIPTION_DIR = os.path.realpath(os.path.join(_ws_src, 'robot_descriptio
 class VisionProcessingNode(Node):
     def __init__(self):
         super().__init__('vision_processing_node')
-        self.bridge = CvBridge()
-        width, height = 1920, 1200     
-        self.cameraframe_1 = np.zeros((256, 256, 3), dtype=np.uint8)
-        self.cameraframe_2 = np.zeros((256, 256, 3), dtype=np.uint8)
-        # Publisher: Gửi hình ảnh camera
-        self.publisher_1 = self.create_publisher(Image, '/camera_top/image_raw', 10)
-        self.publisher_2 = self.create_publisher(Image, '/camera_side/image_raw', 10)
-        self.timer_1 = self.create_timer(0.1, self.timer_callback_1)
-        self.timer_2 = self.create_timer(0.1, self.timer_callback_2)
+        width, height = 1920, 1200
+        camera_matrix = [[958.8, 0.0, 957.8], [0.0, 956.7, 589.5], [0.0, 0.0, 1.0]]
+        distortion_coefficients = [0.14, -0.03, -0.0002, -0.00003, 0.009, 0.5, -0.07, 0.017]
+        # 1. Subscriber: Lắng nghe topic ảnh từ camera (Gazebo, Isaac Sim, hoặc cam thực tế)
+        self.subscription = self.create_subscription(
+            Image,
+            '/camera/image_raw',
+            self.image_callback,
+            10)
+        
+        # 2. Publisher: Gửi kết quả sau khi xử lý (ví dụ: tọa độ vật thể)
+        self.publisher_ = self.create_publisher(Float64MultiArray, '/joints_state', 10)
+        
         self.get_logger().info('Vision Node đã khởi động và đang chờ dữ liệu...')
         stage = omni.usd.get_context().get_stage()
         # 2. Đặt Default Prim là /World
@@ -127,14 +131,13 @@ class VisionProcessingNode(Node):
         distantLight.CreateIntensityAttr(500)
 
         # Add camera
-        self.camera1 = Camera(
+        self.camera = Camera(
             prim_path="/World/camera",
             position=np.array([0.0, 0.0, 180.0]),
             frequency=20,
             resolution=(256, 256),
             orientation=euler_angles_to_quat(np.array([0, 90, 0]), degrees=True),
         )
-        self.camera1.initialize()
         self.camera2 = Camera(
             prim_path="/World/camera2",
             position=np.array([22.4, 195.0, 99.0]),
@@ -149,7 +152,6 @@ class VisionProcessingNode(Node):
             orientation=euler_angles_to_quat(np.array([-90.0, 0.0, 180.0]), degrees=True, extrinsic=False),
             camera_axes="usd",
         )
-        self.camera2.initialize()
 
         # Get handle to the Drive API for joints
         self.joint0_drive = UsdPhysics.DriveAPI.Get(stage.GetPrimAtPath("/World/robot/joints/joint0"), "angular")
@@ -269,13 +271,6 @@ class VisionProcessingNode(Node):
         kit.update()
         print("Start")
 
-    def timer_callback_1(self):
-        msg = self.bridge.cv2_to_imgmsg(self.cameraframe_1, encoding="rgb8")
-        self.publisher_1.publish(msg)
-    def timer_callback_2(self):
-        msg = self.bridge.cv2_to_imgmsg(self.cameraframe_2, encoding="rgb8")
-        self.publisher_2.publish(msg)
-
     def image_callback(self, msg):
         data = msg.data
         
@@ -305,18 +300,9 @@ def main(args=None):
     
     try:
         while rclpy.ok():
-            kit.update()  # Update Isaac Sim mỗi frame trước khi lấy data
             rclpy.spin_once(node, timeout_sec=0.0)  # Non-blocking ROS callback
-            rgba_data_1 = node.camera1.get_rgba()
-            rgba_data_2 = node.camera2.get_rgba()
-            if rgba_data_1.size <= 0:
-                continue
-            # Chuyển sang ảnh RGB để lưu hoặc xử lý (bỏ kênh Alpha)
-            rgb_image_1 = rgba_data_1[:, :, :3]
-            rgb_image_2 = rgba_data_2[:, :, :3]
-            node.cameraframe_1 = rgb_image_1
-            node.cameraframe_2 = rgb_image_2
-            # print(rgb_image)
+                
+            kit.update()  # Update Isaac Sim mỗi frame
     except KeyboardInterrupt:
         pass
     finally:

@@ -1,0 +1,25 @@
+[0.362s] Invoking command in '/home/pread/Project/ros2_ws/src/pcgrad': PYTHONPATH=/home/pread/Project/ros2_ws/src/build/pcgrad/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/pcgrad build --build-base /home/pread/Project/ros2_ws/src/build/pcgrad/build install --record /home/pread/Project/ros2_ws/src/build/pcgrad/install.log --single-version-externally-managed install_data
+[0.498s] running egg_info
+[0.498s] writing ../build/pcgrad/pcgrad.egg-info/PKG-INFO
+[0.498s] writing dependency_links to ../build/pcgrad/pcgrad.egg-info/dependency_links.txt
+[0.498s] writing entry points to ../build/pcgrad/pcgrad.egg-info/entry_points.txt
+[0.499s] writing requirements to ../build/pcgrad/pcgrad.egg-info/requires.txt
+[0.499s] writing top-level names to ../build/pcgrad/pcgrad.egg-info/top_level.txt
+[0.499s] reading manifest file '../build/pcgrad/pcgrad.egg-info/SOURCES.txt'
+[0.500s] writing manifest file '../build/pcgrad/pcgrad.egg-info/SOURCES.txt'
+[0.500s] running build
+[0.500s] running build_py
+[0.500s] copying pcgrad/run_environment.py -> /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad
+[0.500s] running install
+[0.500s] running install_lib
+[0.501s] copying /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad/run_environment.py -> /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad
+[0.501s] byte-compiling /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad/run_environment.py to run_environment.cpython-310.pyc
+[0.502s] running install_data
+[0.502s] running install_egg_info
+[0.503s] removing '/home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad-0.0.0-py3.10.egg-info' (and everything under it)
+[0.504s] Copying ../build/pcgrad/pcgrad.egg-info to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad-0.0.0-py3.10.egg-info
+[0.504s] running install_scripts
+[0.515s] Installing joints_state script to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/pcgrad
+[0.515s] Installing run_environment script to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/pcgrad
+[0.515s] writing list of installed files to '/home/pread/Project/ros2_ws/src/build/pcgrad/install.log'
+[0.530s] Invoked command in '/home/pread/Project/ros2_ws/src/pcgrad' returned '0': PYTHONPATH=/home/pread/Project/ros2_ws/src/build/pcgrad/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../build/pcgrad build --build-base /home/pread/Project/ros2_ws/src/build/pcgrad/build install --record /home/pread/Project/ros2_ws/src/build/pcgrad/install.log --single-version-externally-managed install_data

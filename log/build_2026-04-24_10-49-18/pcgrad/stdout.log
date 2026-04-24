@@ -1,0 +1,41 @@
+running egg_info
+creating ../build/pcgrad/pcgrad.egg-info
+writing ../build/pcgrad/pcgrad.egg-info/PKG-INFO
+writing dependency_links to ../build/pcgrad/pcgrad.egg-info/dependency_links.txt
+writing entry points to ../build/pcgrad/pcgrad.egg-info/entry_points.txt
+writing requirements to ../build/pcgrad/pcgrad.egg-info/requires.txt
+writing top-level names to ../build/pcgrad/pcgrad.egg-info/top_level.txt
+writing manifest file '../build/pcgrad/pcgrad.egg-info/SOURCES.txt'
+reading manifest file '../build/pcgrad/pcgrad.egg-info/SOURCES.txt'
+writing manifest file '../build/pcgrad/pcgrad.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/pread/Project/ros2_ws/src/build/pcgrad/build
+creating /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib
+creating /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad
+copying pcgrad/__init__.py -> /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad
+copying pcgrad/joints_state.py -> /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad
+copying pcgrad/run_environment.py -> /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad
+running install
+running install_lib
+creating /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad
+copying /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad/__init__.py -> /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad
+copying /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad/joints_state.py -> /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad
+copying /home/pread/Project/ros2_ws/src/build/pcgrad/build/lib/pcgrad/run_environment.py -> /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad
+byte-compiling /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad/__init__.py to __init__.cpython-310.pyc
+byte-compiling /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad/joints_state.py to joints_state.cpython-310.pyc
+byte-compiling /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad/run_environment.py to run_environment.cpython-310.pyc
+running install_data
+creating /home/pread/Project/ros2_ws/src/install/pcgrad/share/ament_index
+creating /home/pread/Project/ros2_ws/src/install/pcgrad/share/ament_index/resource_index
+creating /home/pread/Project/ros2_ws/src/install/pcgrad/share/ament_index/resource_index/packages
+copying resource/pcgrad -> /home/pread/Project/ros2_ws/src/install/pcgrad/share/ament_index/resource_index/packages
+copying package.xml -> /home/pread/Project/ros2_ws/src/install/pcgrad/share/pcgrad
+creating /home/pread/Project/ros2_ws/src/install/pcgrad/share/pcgrad/launch
+copying launch/pcgrad_launch.py -> /home/pread/Project/ros2_ws/src/install/pcgrad/share/pcgrad/launch
+running install_egg_info
+Copying ../build/pcgrad/pcgrad.egg-info to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/python3.10/site-packages/pcgrad-0.0.0-py3.10.egg-info
+running install_scripts
+Installing joints_state script to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/pcgrad
+Installing run_environment script to /home/pread/Project/ros2_ws/src/install/pcgrad/lib/pcgrad
+writing list of installed files to '/home/pread/Project/ros2_ws/src/build/pcgrad/install.log'

@@ -1,0 +1,4 @@
+[console_scripts]
+joints_state = pcgrad.joints_state:main
+run_environment = pcgrad.run_environment:main
+
